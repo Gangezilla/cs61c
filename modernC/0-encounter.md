@@ -11,4 +11,14 @@
 
 # Chapter 2: The principal structure of a program
 
--
+- Two categories of aspects to consider:
+
+1. Syntactical aspects, how do we specify the program so the compiler understands it?
+2. Semantic aspects, what do we specify so that the program does what we want it to do?
+
+- Commas and semicolons are called separators or terminators. A comma separates the four arguments, and a terminator ends a line.
+- All identifiers have to be declared. An identifier is anything like a variable, a type, functions, and constants.
+- Identifiers follow a pattern. So an identifier followed by brackets `()` is a function, and one followed by square brackets `[]` is an array.
+- Each declaration starts with a type.
+- Identifiers may have several consistent declarations.
+- Declarations are bound to the scope in which they appear.

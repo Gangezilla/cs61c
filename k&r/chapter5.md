@@ -25,3 +25,36 @@
 - If a pointer points to a[0], then `pa + 1` points to the next element. So yeah, you can add to a pointer and then it'll just point to whatever the next object in memory is now.
 
 ## Address Arithmetic
+
+- Address arithmetic is a method of calculating the adress of an object with the help of arithmetic operations on pointers. For example, if we had a pointer `p`, we can do `p++` to get the next element in memory.
+- C has two routines for memory allocation. The first is `alloc(n)`, which returns a pointer p to n-consecutive character positions, which can be used by the caller of `alloc` to store characters. It's sibling function is called `afree(p)` which is used to free up the memory. They're rudimentary tho, cos the memory handled by them is managed by a stack, so it has to be released LIFO style. You'd usually use `malloc` and `free` FYI.
+- The easiest way to implement a rudimentary storage allocator is to have `alloc` hand out pieces of a large character array, which is private. We'd need to know how much of this large memory array has been used, and we'd have a pointer that points to the next free element. With that pointer, we'd check if there's some free space left that's enough. If there is, we return a pointer to that block of memory, otherwise we return zero.
+- If pointers `p` and `q` point to members of the same array, then relations like `==`, `!=` etc work properly.
+
+## Character Pointers and Functions
+
+- A string constant, such as "Hello" is an array of characters. In the internal representation, the array is terminated with the null character `\0` so that programs can find the end. This means the length in storage is one more than the number of characters between the double quotes.
+- When a character string like this appears in a program, access to it is through a character pointer.
+- Writing `char amessage[] = "string string"` gives you an array of characters, whereas writing `char *pmessage = "string string"` will give you a pointer to that string in memory.
+- C doesn't have any built in string manipulation functions, because to C they're all just chunks of memory.
+- This means you'll need to write your own string manipulation functions.
+
+### Exercise 5-3:
+
+```c
+char *strcat(char *string, char *stringToBeJoined, size_t size) {
+  char *newPointer; // initialise a new pointer
+  newPointer = string; // set the new pointer to the string pointer.
+  while (*newPointer != '\0') {
+    newPointer++;
+  } // this loop finds the last memory block and sets our pointer to it
+
+  while(size > 0 && *stringToBeJoined != '\0') { // we then go through our string we're cat'ing on making sure the size is valid and we havent reached the end
+    *newPointer++ = *stringToBeJoined++; // we iterate our pointer, and the string and we set the new string in memory.
+    size--;
+  }
+}
+
+```
+
+### Exercise 5-4:

@@ -56,5 +56,3 @@ char *strcat(char *string, char *stringToBeJoined, size_t size) {
 }
 
 ```
-
-### Exercise 5-4:

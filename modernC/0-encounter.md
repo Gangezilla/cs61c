@@ -22,3 +22,8 @@
 - Each declaration starts with a type.
 - Identifiers may have several consistent declarations.
 - Declarations are bound to the scope in which they appear.
+
+- C distinguishes the lexical structure (punctuators, identifiers, numbers...), the grammatical structure (syntax), and the semantics (meaning) of programs.
+- All identifiers (names) must be declared such that we know the properties of the concept they represent.
+- All objects (things that we deal with) and functions (methods we use to deal with things) must be defined; that is, we must specify how and where they come to be.
+- Statements indicate how things are going to be done: iterations (for) repeat variations of a task, functions calls delegate a task to a function, and function returns go back where we came from.

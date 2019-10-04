@@ -33,3 +33,11 @@ if (i > 25) {
 ```
 - This means if the condition is false, a while loop won't run its block at all, and a do loop will run it once. This is because the condition gets checked afterwards.
 - You can also break out of a loop with `break`, and you can use `continue` to start the loop again, skipping everything else that comes afterwards.
+- You've also got `else if` and `switch` statements as well.
+
+## Expressing computations
+- The type `size_t` represents values in the range [0, SIZE_MAX]. SIZE_MAX is quite large, and varies based on the platform. On a 64 bit system its a very very large number.
+- Symbols and combinations like `+` and `!=` are called operators, and the things that they're applied to are called operands.
+- Unsigned arithmetic is always well defined, that is, regardless of the values we feed into an operation, our computation will always have a valid result as long as it's withing the range [0, SIZE_MAX].
+
+ Up to Page 31

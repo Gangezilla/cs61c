@@ -112,4 +112,14 @@ printf("x is 5.0");
 
 #### Basic types
 
--
+- Two different classes of numbers, each with two subclasses: signed and unsigned integers, real and complex floating-point numbers.
+- Each of these contain several types, all differing according to their precision and this determines the valid range of values that can be stored in each one.
+- Use unsigned numbers for small quantities that can't be negative.
+- Use signed for small quantities that can be negative.
+- Use `ptrdiff_t` for large differences that have a sign.
+- Use `double` for floating point calculations
+- Use `double complex` for complex calculations
+
+OK, so there's a lot about numbers in here and I've skipped a lot of it sorry.
+
+### Initialisers

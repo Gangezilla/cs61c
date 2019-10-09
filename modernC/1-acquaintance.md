@@ -12,6 +12,8 @@
 
 ### Conditional Execution
 
+---
+
 - C has if statements as you know and love:
 
 ```c
@@ -123,3 +125,26 @@ printf("x is 5.0");
 OK, so there's a lot about numbers in here and I've skipped a lot of it sorry.
 
 ### Initialisers
+
+- Initialisers are an important part of an object definition, they help us guarantee that a program execution is always in a defined state.
+- Therefore, all varaibles should be initalised. The only exceptions to this are variable-length arrays because they don't allow for an initaliser.
+- For scalar types (meaning they hold a single data item) like integers and floating points you'd do like `double a = 7.8;`. For other types, you must use `{}`. An array for example looks like `double A[] = {7.8, };` or `double B[3] = {1, 2, 3}`.
+- For arrays that have an _incomplete type_ where no length is specified, the initialiser specifies the length to complete this. However, it's better to use a designated initaliser by specifying the number as it makes your code better.
+
+There's a lot in here about bits and constants but it doesn't feel as relevant for me right now.
+
+## Derived Data Types
+
+- Here we talk about grouping objects into arrays, using pointers as opaque types, combining objects into structures, giving types new names with typedef
+- Arrays and structures are called aggregate data types because they combine multiple instances of one or several other data types.
+- The two other strategies to derive data types are more involved. You've got **pointers**, which refer to an object in memory. They're the most involved concept which gets discussed later. Here we only discuss them as an opaque data type only. You've also got **unions**, which overlay different base types in the same memory location. They require a deeper understanding of C's memory model, and aren't too useful so we discuss them way later.
+
+### Arrays
+
+- Arrays allow us to group objects of the same type into an encapsulating object. Arrays and pointers are closely related in C. Arrays look like pointers, and pointers refer to array objects. We chose arrays first because it's easier to describe them in a way that's consistent with C's assumptions about the abstract state machine.
+- Firstly, arrays are **not** pointers.
+
+#### Array operations
+
+- An array in a condition evaluates to true. It's also important to note that we can't evaluate arrays like other objects. This is because there are array objects, but no array values.
+- Arrays also can't be compared, or assigned to.

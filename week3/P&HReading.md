@@ -87,3 +87,34 @@ add $s1, $s2, $t0 # g = h + A[8];
 ```
 
 - We multiply the starting address by the offset (8) to get the 8th position (i think).
+- In addition to associating variables with registers, the compiler allocates data structures like arrays and structures to locations in memory.
+- In MIPS, words must start at addresses that are multiples of 4. This is called an **alignment restriction** and many architectures have them.
+- MIPS is big endian meaning we address it from the "big" side, ie left.
+- The instruction complementary to load is called **store**, it ocpies data from a register to a memory, it's `sw` which stands for store word.
+- Because the addresses in loads and stores are binary numbers, we can see why RAM for memory comes in binary sizes rather than decimals.
+
+```c
+A[12] = h + A[8];
+```
+
+in MIPS:
+
+```asm
+  lw $to, 32($s3) # temp reg $t0 gets A[8]
+  add $t0, $s2, $t0 # temp reg $t0 gets h + A[8]
+  sw $t0, 48($s3) # stores h + A[8] back into A[12]
+```
+
+- The process of putting less commonly used variables into memory is called _spilling registers_.
+- Registers take less time to access and have a higher throughput than memory, it also uses less.
+
+## Constant or Immediate Operands
+
+- We can use `addi` to add a constant value, instead of having to pull that value from memory.
+
+```asm
+addi $s3, $s3, 4 # $s3 = $s3 + 4
+```
+
+- Operations with constants happen often, so doing it this way is faster instead of pulling this from memory.
+- The constant zero has another role, which is to simplify the instruction set. For example, the move operation is just an add instruction where one operand is zero. Hence MIPS dedicates a register \$zero to be 0.

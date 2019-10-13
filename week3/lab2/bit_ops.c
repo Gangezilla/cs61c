@@ -7,17 +7,21 @@ unsigned get_bit(unsigned integer, unsigned bit) {
   // starts off by setting the LSB as 1 (0b0000_0001)
   // and then moves that one across to the bit we want, (1 << 2 == 0b0000_0100)
   int maskedInteger = integer & mask;
-  int theBit = maskedInteger >> bit;
+  // apply the mask to the integer
+  return maskedInteger >> bit;
 }
 // Set the nth bit of the value of x to v.
 // Assume 0 <= n <= 31, and v is 0 or 1
-void set_bit(unsigned *x, unsigned n, unsigned v) {
-  // YOUR CODE HERE
+void set_bit(unsigned *integer, unsigned bit, unsigned value) {
+  int mask = 1 << bit;
+  *integer &= ~(mask);
+  *integer |= value << bit;
 }
 // Flip the nth bit of the value of x.
 // Assume 0 <= n <= 31
-void flip_bit(unsigned *x, unsigned n) {
-  // YOUR CODE HERE
+void flip_bit(unsigned *integer, unsigned bit) {
+  int mask = 1 << bit;
+  *integer = *integer ^ mask;
 }
 
 /*

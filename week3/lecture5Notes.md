@@ -1,4 +1,4 @@
-# Intro to MIPS - We got 12 minutes in then realised it was the wrong one...
+# Intro to MIPS
 
 - Last lecture, started looking at high level languages like C. Next few lectures we'll be looking at what the compiler creates as an intermediate languatge thast super close to the hardware.
 - Instructions from a compiler map 1-1 to a string of bits that a computer understands, an assembler is what does this for us.

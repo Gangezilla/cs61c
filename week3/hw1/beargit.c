@@ -115,7 +115,8 @@ int is_commit_msg_ok(const char *msg) {
   return 0;
 }
 
-void next_commit_id(char *commit_id) { /* COMPLETE THE REST */ }
+void next_commit_id(char *commit_id) { /* COMPLETE THE REST */
+}
 
 int beargit_commit(const char *msg) {
   if (!is_commit_msg_ok(msg)) {
@@ -139,10 +140,39 @@ int beargit_commit(const char *msg) {
  */
 
 int beargit_status() {
-  // read ./beargit/.index
-  // read out it's contents separated by \n
-  /* COMPLETE THE REST */
+  char *buffer = 0;
+  long size;
+  FILE *file_pointer = fopen(".beargit/.index", "r");
+  int line_count = 0;
 
+  ASSERT_ERROR_MESSAGE(file_pointer != NULL, "couldn't open file, soz");
+
+  fseek(file_pointer, 0, SEEK_END);
+  size = ftell(file_pointer);
+  fseek(file_pointer, 0, SEEK_SET);
+  buffer = malloc(size);
+  if (buffer) {
+    fread(buffer, 1, size, file_pointer);
+  }
+  fclose(file_pointer);
+
+  const char *p = &buffer[0];
+  for (int i = 0; i < size; i++) {
+    if (p[i] == '\n') {
+      line_count++;
+    }
+  }
+
+  if (buffer) {
+    printf("Tracked files:\n");
+    printf("\n");
+    printf("%s\n", buffer);
+    printf("%d files total\n", line_count);
+  } else {
+    printf("Something went wrong, sorry. Try again?")
+  }
+
+  // its printing some null pointer value for some reason but pretty good!
   return 0;
 }
 

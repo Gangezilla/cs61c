@@ -65,27 +65,31 @@ int beargit_init(void) {
 
 int beargit_add(const char *filename) {
   FILE *findex = fopen(".beargit/.index", "r");
+  // opens the .index file for reading
   FILE *fnewindex = fopen(".beargit/.newindex", "w");
-
-  char line[FILENAME_SIZE];
+  // opens the .newindex file for writing, and (presumably) also creates it
+  char line[FILENAME_SIZE]; // creates a new string as big as the line size?
   while (fgets(line, sizeof(line), findex)) {
-    strtok(line, "\n");
-    if (strcmp(line, filename) == 0) {
+    // gets a line from file, puts it in line, and loops until done.
+    strtok(line, "\n");                // splits the string by \n
+    if (strcmp(line, filename) == 0) { // compares string, checks if same
       fprintf(stderr, "ERROR: File %s already added\n", filename);
-      fclose(findex);
-      fclose(fnewindex);
-      fs_rm(".beargit/.newindex");
-      return 3;
+      fclose(findex);              // close file
+      fclose(fnewindex);           // close new file
+      fs_rm(".beargit/.newindex"); // delete new file
+      return 3;                    // return error code
     }
 
     fprintf(fnewindex, "%s\n", line);
+    // fprintf puts the existing file into the temp file
   }
 
   fprintf(fnewindex, "%s\n", filename);
-  fclose(findex);
-  fclose(fnewindex);
+  // appends the new filename into the temp file
+  fclose(findex);    // close old file
+  fclose(fnewindex); // close temp file
 
-  fs_mv(".beargit/.newindex", ".beargit/.index");
+  fs_mv(".beargit/.newindex", ".beargit/.index"); // makes temp file actual file
 
   return 0;
 }
@@ -97,8 +101,28 @@ int beargit_add(const char *filename) {
  */
 
 int beargit_rm(const char *filename) {
-  /* COMPLETE THE REST */
+  FILE *index = fopen(".beargit/.index", "r");
+  FILE *temp_index = fopen(".beargit/.newindex", "w");
+  char filename_to_find[FILENAME_SIZE];
+  int found = 0;
 
+  while (fgets(filename_to_find, sizeof(filename_to_find), index)) {
+    strtok(filename_to_find, "\n");
+    if (strcmp(filename_to_find, filename) == 0) {
+      found = 1;
+    } else {
+      // magic is that we loop through the file, and if we DONT see our
+      // filename, we add to our temp file we then use this to overwrite later
+      fprintf(temp_index, "%s\n", filename_to_find);
+    }
+  }
+  fclose(index);
+  fclose(temp_index);
+  fs_mv(".beargit/.newindex", ".beargit/.index");
+  if (found == 0) {
+    fprintf(stderr, "ERROR: File %s not tracked\n", filename);
+    return 1;
+  }
   return 0;
 }
 
@@ -111,7 +135,26 @@ int beargit_rm(const char *filename) {
 const char *go_bears = "GO BEARS!";
 
 int is_commit_msg_ok(const char *msg) {
-  /* COMPLETE THE REST */
+  const char *BEARS_MESSAGE[] = "GO BEARS!";
+
+  int function_exiter = 0;
+  int bears_iterator = 0;
+  int i;
+
+  for (i = 0; *msg != '\0'; msg++) {
+    if (*msg == bears_count[i]) {
+      function_exiter = 1;
+      if (bears_count[i + 1] == '\0') {
+        return 1;
+      }
+      i++;
+    } else if (function_exiter == 1) {
+      // we enter here if the last character matched, but this one did not.
+      function_exiter = 0;
+      i = 0;
+    }
+  }
+
   return 0;
 }
 
@@ -169,7 +212,7 @@ int beargit_status() {
     printf("%s\n", buffer);
     printf("%d files total\n", line_count);
   } else {
-    printf("Something went wrong, sorry. Try again?")
+    printf("Something went wrong, sorry. Try again?");
   }
 
   // its printing some null pointer value for some reason but pretty good!

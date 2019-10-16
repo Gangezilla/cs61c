@@ -118,3 +118,22 @@ addi $s3, $s3, 4 # $s3 = $s3 + 4
 
 - Operations with constants happen often, so doing it this way is faster instead of pulling this from memory.
 - The constant zero has another role, which is to simplify the instruction set. For example, the move operation is just an add instruction where one operand is zero. Hence MIPS dedicates a register \$zero to be 0.
+
+# 2.6 Logical Operations
+
+- Operations to do bit manipulation:
+  - Bit shifts, left and right shifts.
+  - In MIPS its:
+    - `sll` - shift left
+    - `srl` - shift right
+    - `and`, `andi` - logical and
+    - `or`, `ori` - logical or
+    - `nor` - logical not
+
+# 2.7 Insturctions for Making Decisions
+
+# 2.8
+
+# 2.9
+
+# 2.10 (p111 - 113)

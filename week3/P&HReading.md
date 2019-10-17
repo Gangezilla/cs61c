@@ -132,6 +132,11 @@ addi $s3, $s3, 4 # $s3 = $s3 + 4
 
 # 2.7 Insturctions for Making Decisions
 
+- Computers are distinguished from calculators based on their ability to make decisions.
+- MIPS includes two decision making instructions. The first is `beq`, and gets used like this:
+  - `beq register1, register2, L1`
+  - This means go to the label L1 if the value in register 1 equals the value in register2.
+
 # 2.8
 
 # 2.9

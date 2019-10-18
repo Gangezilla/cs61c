@@ -298,5 +298,76 @@ int fact (int n) {
 - Frame pointer is convenient because all references to variables within a procedure use the same offset.
 
 # 2.9 - Communicating with People
+- Most computers use ASCII to represent characters cos its 8-bit. Of course, this has its problems but I don't know if it's going to be covered here...
+- A series of instructions can extract a byte from a word, so load word and store word are sufficient for transferring bytes as well as words.
+- MIPS gives us instructions to transfer bytes, `lb` and `sb`
+```asm
+lb $t0, 0($sp) # read byte from source
+sb $t0, 0($gp) # write byte to destination
+```
+- Characters are normally combined into strings, which have a variable number of characters. There are three choices for representing a string:
+1. The first position of the string is reserved to give the length of the string
+2. An accompanying variable has the length of the string (like in a structure)
+3. The last position of a string is indicated by a character used to mark the end of a string. This is the one C uses.
 
-# 2.10 (p111 - 113)
+```c
+void strcpy (char x[], char y[]) {
+  int i;
+  i = 0;
+  while ((x[i] == y[i]) != '\0') {
+    i += 1;
+  }
+}
+```
+- To init i to 0, the next instruction sets $s0 to 0 by adding 0 to 0 and placing that sum in $s0 - line 4
+- Beginning of loop, address of y[i] is formed by adding i to y[] - line 5
+- Note we don't have to multiply i by 4 since y is an array of bytes, and not of words.
+- To load the character in y[i], we use load byte unsigned which puts the character into `$t2` - line 6
+- A similar address calculation puts the address of x[i] in $t3 and then the character in $t2 is stored at that address. - line 7 and 8
+- Next, we exit the loop if the character was 0, meaning if we're at the last character of the string - line 9
+- If not, we increment i and loop back - lines 10 and 11
+- If we don't loop back, it was the last character of the string and we restore $s0 and the stack pointer and then return - lines 12 - 14
+- String copies usually use pointers instead of arrays in C to avoid the operations on i in the code above
+```asm
+1  | strcpy:
+2  |   addi $sp, $sp, -4 # adjust stack for 1 more item
+3  |   sw $s0, 0($sp) # save $s0
+4  |   add $s0, $zero, $zero # i = 0 + 0
+5  |   L1: add $t1, $s0, $a1 # address of y[i] in $t1
+6  |   lbu $t2, 0($t1) # $t2 = y[i]
+7  |   add $t3, $s0, $a0 # address of x[i] in $t3
+8  |   sb $t2, 09$t3) # x[i] = y[i]
+9  |   beq $t2, $zero, L2 # if y[i] == 0, go to L2
+10 |   addi $s0, $s0, 1 # i = i + 1
+11 |   L2: lw $s0, 0($sp) # y[i] == 0: end of string
+12 |   addi $sp, $sp, 4 # pop 1 wor off the stack
+13 |   jr $ra # return
+```
+- Since the above procedure above is a leaf procedure, the compiler could allocate i to a temporary register to avoid saving and restoring $s0. We can thus think of the $t registers as being for temporaries, but also for registers that the callee can use whenever convenient
+- When a compiler finds a leaf procedure, it exhausts all temporary registers before using registers that it has to save.
+
+## Characters and Strings in Java
+- Java uses Unicode, which uses 16 bits to represent a character.
+- MIPS has explicit instructions to load and store 16 bit quantities, called halfwords. `lh`, loads a half word and places it in the rightmost 16 bits of a register
+- This only works on signed integers, so you can use `lhu` to load unsigned half words. `sh` store half, takes a halfword from the rightmost 16 bits and writes it to memory.
+```asm
+lhu $t0, 0($sp) # read halfword (16 bits) from source
+sh $t0, 0($gp) # write halfword (16 bits) to destination
+```
+
+# 2.10 MIPS Addressing for 32-bit Immediates and Addresses (p111 - 113)
+- Although keeping all MIPS instructions 32 bits long simplifies the hardware, its sometimes convenient to have a 32 bit constant or 32 bit address.
+
+## 32-Bit Immediate Operands
+- Although constants are frequently short and fit into 16-bit field, sometimes they're bigger. The MIPS instruction *load upper immediate* `lui` sets the upper 16 bits of a constant in a register, allowing a subsequent instruction to specify the lower 16 bits of the constant.
+
+- In order to load a MIPS assembly code to load this 32-bit constant into register $s0 we do this:
+`0000 0000 0011 1101 0000 1001 0000 0000`
+- First we load the upper 16 bits, using `lui`. This puts 61 in binary into the register $s0 which is 16
+- Then we insert the lower 16 bits, which is 2304
+```asm
+lui $s0, 61 # 61 decimal = 000... in binary
+ori $s0, $s0, 2304 # 2304 decimal
+```
+- Either the compiler or assembler must break large constants into pieces and then reassemble them into a register. As you might expect, immediate's size restriction may be a problem for memory addresses in loads and stores as well as for constants
+- Basically, creating 32 bit constants requires care. The instruction `addi` copies the leftmost bit of the 16bit field of the instruction into the upper 16bits of a word. *Logical or immediate* loads 0s into the upper 16 bits, and hence is used in conjunction with `lui` to create 32 bit constants.

@@ -133,12 +133,170 @@ addi $s3, $s3, 4 # $s3 = $s3 + 4
 # 2.7 Insturctions for Making Decisions
 
 - Computers are distinguished from calculators based on their ability to make decisions.
-- MIPS includes two decision making instructions. The first is `beq`, and gets used like this:
-  - `beq register1, register2, L1`
-  - This means go to the label L1 if the value in register 1 equals the value in register2.
+- MIPS includes two decision making instructions, these are:
+  - `beq register1, register2, L1` - This means go to the label L1 if the value in register 1 equals the value in register2.
+  - `bne register1, register2, L1` - which will branch if the two are not equal
+- Let's say we had the following C code, where `f`, `g`, `h`, `i` and `j` correspond to regsiters `$s0` to `$s4`
+```c
+if (i == j) {
+  f = g + h;
+} else {
+  f = g - h;
+}
+```
 
-# 2.8
+```asm
+  bne $s3, $s4, Else # go to Else if i != j
+  add $s0, $s1, $s2 # f = g + h
+  j Exit # go to Exit
+  Else: sub $s0, $s1, $s2 # f = g - h
+  Exit:
+```
+- What about loops?
+- Let's assume i and k correspond to $s3 and $s5 and the base of the array save is in $s6
+```c
+while (save[i] == k) {
+  i += 1;
+}
+```
 
-# 2.9
+- First step is load `save[i]` into a temporary register and to do this we need it's address. Before we can add i to the base of array `save`, we first have to multiply the index `i` by 4 due to byte addressing. We use `sll` to do this, because shifting left by 2 multiples by 2^2 (4).
+```asm
+Loop: sll $t1, $s3, 2
+add $t1, $t1, $s6 # $t1 = address of save[i]
+lw $t0, 0($t1) # temp reg $t0 = save[i]
+bne $t0, $s5, Exit # go to Exit if save[i] != k
+addi $s3, $s4, 1 # i = i + 1
+j Loop # go to Loop
+Exit:
+```
+- Such sequences of instructions that end in a branch are so fundamental to compiling that we call them a block, which is a sequence of instructions without branches. One of the first phases of compilation is breaking the program into blocks.
+- If you want to check if a variable is less than another variable you can use `slt`, like `slt $t0, $s3, $s4 # $t0 = 1 if $s3 < $s4` which stands for "set on less than". There's also a sister operation called `slti` thats used like `slti $t0, $s2, 10 # $t0 = 1 if $s2 < 10`.
+- MIPS compilers use `slt`, `slti`, `beq`, `bne` and `$zero` to create all relative conditions: equal, not equal, less than, less than or equal, greater than, greater than or equal.
+- If you're working with unsigned integers, you can use `sltu` and `sltiu`.
+
+# 2.8 Supporting Procedures in Computer Hardware
+- Procedures (Functions) allow for easy code reuse.
+- In order to do a function, the program must follow these six steps
+1. Put parameters in a place where the procedure can access them,
+2. Transfer control to the procedure
+3. Acquire the storage resources needed for the procedure
+4. Perform the desired task
+5. Put the result value in a place where the calling program can access it.
+6. Return control to the point of origin, since a procedure can be called from several points in a program.
+- MIPS has has a few special purpose registers for this:
+  - `$a0` - `$a3` which are four argument registers in which to pass parameters
+  - `$v0` - `$v1` which are two value registers in which to return values
+  - `$ra` one return address register to return to the point of origin
+- MIPS includes an instruction just for procedures, it jumps to an address and simultaneously saves the address of the following instruction in register `$ra`. The jump-and-link instruction `jal` is used like `jal ProcedureAddress`
+- The `jr` instruction jumps to the address stored in register `$ra`. Thus the calling program puts the parameters in `$a0` - `$a3` and uses `jal X` to jump to procedure X (the callee). The callee then performs the calculations, places the results in `$v0` and `$v1` and returns control to the caller using `jr $ra`.
+- The return address gets stored in the **program counter**, this really should be called the instruction address register, but we call it this for historical reasons. The `jal` instruction saves PC + 4 in register `$ra` to link to the following instruction.
+
+## Using more Registers
+- If a compiler needs more registers for a procedure than the four argument and two return value registers, we have to restore any registers we used back to their previous status.
+- This means we need to *spill* registers to memory, and the ideal place to do this is the stack - a last-in-first-out (LIFO) queue.
+- A stack needs a pointer to the most recently allocated address in the stack to show where the next procedure should place the registers to be spilled or where old register values are found. The *stack pointer* is adjusted by one word for each register that is saved or restored, which is how it grows downwards.
+- MIPS reserves register 29 for the stack pointer, calling it `$sp`. Placing data onto the stack is a *push* and removing data from the stack is a *pop*.
+- Stacks "grow" from higher addresses to lower addresses, meaning that you push values onto the stack by subtracting from the stack pointer. Adding to the stack pointer shrinks the stack, popping values off the stack.
+
+```c
+int leaf_example (int g, int h, int i, int j) {
+  int f;
+  f = (g + h) - (i + j);
+  return f;
+}
+```
+- We start with the label of the procedure - line 1
+- Then we save the registers used by the procedure, we need to save three registers so we create space on the stack for three registers, then push them onto the stack - lines 2 - 5
+- Then we carry out the procedure. - lines 6 - 8
+- We return the value of f by copying it to a return value register - line 9
+- Before returning, we restore the three old values of the registers by popping them from the stack - lines 10 - 13
+- The procedure ends with a jump register using the return address - line 14
+
+```asm
+1  | leaf_example:
+2  | addi $sp, $sp, -12 # adjust stack to make room for 3 items
+3  | sw $t1, 8($sp) # save register $t1 for use afterwards
+4  | sw $t0, 4($sp) # save register $t0 for use afterwards
+5  | sw $s0, 0($sp) # save register $s0 for use afterwards
+6  | add $t0, $a0, $a1 # register $t0 contains g + h
+7  | add $t1, $a2m $a3 # register $t1 contains i + j
+8  | sub $s0, $t0, $t1 # f = $t0 - $t1 (g + h) - (i + j)
+9  | add $v0, $s0, $zero # returns f ($v0 = $s0 + 0)
+10 | lw $s0, 0($sp) # restore register $s0
+11 | lw $t0, 4($sp) # restore register $t0
+12 | lw $t1, 8($sp) # restore register $t1
+13 | addi $sp, $sp, 12 # adjust stack to delete 3 items
+14 | jr $ra # jump back to calling routine
+```
+
+- We can also take advantage of our temporary registers, where it's assumed that these do not get preserved by the called on a procedure call
+
+## Nested Procedures
+- Procedures that don't call others are called leaf procedures, and these aren't too common.
+- If a function calls another one, we have to be careful because we can overwrite the values in our argument registers. A solution to this is to push all the registers that need to be preserved onto the stack. The stack pointer is adjusted to account for the number of registers placed on the stack. Upon return, registers are restored from memory and the stack pointer is readjusted.
+
+```c
+int fact (int n) {
+  if (n < 1) {
+    return 1;
+  } else {
+    return (n * fact(n - 1));
+  }
+}
+```
+- We start with the label of the procedure - line 1
+- Then we save two registers, return address and $a0 on the stack - lines 2 - 4
+- The first time `fact` is called, `sw` saves an address in the program called `fact`. Then we test whether `n` is less than 1, going to L1 if `n >= 1` - lines 5 - 6
+- If n is less than 1, fact returns 1 by putting 1 into a value register - line 7
+- It then pops the two saved values off the stack and jumps to the return address - lines 8 - 9
+- If n is not less than 1, the argument n is decremented and then fact is called again with the decremented value - lines 10 - 11
+- The next instruction is where fact returns. Now the old return address and old argument are restored, along with the stack pointer - lines 12 - 14
+- Then the value register $v0 gets the product of old argument $a0 and the current value of the value register - line 15
+- `fact` then jumps back to the return address - line 16
+```asm
+1  | fact:
+2  | addi $sp, $sp, -8 # adjust stack for 2 items
+3  | sw $ra, 4($sp) # save the return address
+4  | sw $a0, 0($sp) # save the argument n
+5  | slti $t0, $a0, 1 # test for n < 1
+6  | beq $t0, $zero, L1 # if n >= 1, go to L1
+7  | addi $v0, $zero, 1 # return 1
+8  | addi $sp, $sp, 8 # pop 2 items off stack
+9  | jr $ra # return to caller
+10 | L1: addi $a0, $a0, -1 # n >= 1: argument gets (n - 1)
+11 | jal fact # call fact with (n - 1)
+12 | lw $a0, 0($sp) # return from jal: restore argument n
+13 | lw $ra, 4($sp) # restore the return address
+14 | addi $sp, $sp, 8 # adjust stack pointer to pop 2 items
+15 | mul $v0, $a0, $v0 # return n * fact (n - 1)
+16 | jr $ra
+```
+
+- A C variable is generally a location in storage, and its interpretation depends both on its *type* and *storage* class.
+- C has two storage classes, automatic (local to a procedure) and static (existing across procedures).
+- C variables declared outside all procedures are considered static, as well as any using the keyword `static`.
+- To simplify access to static data, MIPS software reserves another register called the *global pointer*, `$gp`.
+
+## Refresher on stack and heap
+- Stack is a block of memory set aside as scratch space for a particular function or thread.
+- The heap is set aside for dynamic allocation, and is how something like `malloc` works
+
+## Allocating space for new data on the Stack
+- The final complexity is that the stack is also used to store variables that are local to the procedure but don't fit in registers, such as local arrays or structures.
+- The segment of the stack containing a procedure's saved registers and local variables is called a *procedure frame* or *activation record*.
+- Some MIPS software uses a *frame pointer*, which is a value denoting the location of the saved registers and local variables for a given procedure.
+
+## Allocating space for new data on the Heap
+- In addition to automatic variables that are local to procedures, C programmers need space in memory for static variables and dynamic data structures.
+- The stack starts in the high end of memory and grows down. The first part of the low end of memory is reserved, followed by the MIPS machine code. Above the code is the static data segment for variables and static variables.
+- Although arrays tend to be fixed, linked lists and the like tend to grow and shrink. The segment for such data is called the *heap* and is placed next in memory. Allocating the stack and heap like this next to each other means they grow towards each other, allowing efficient memory use as the two segments grow and shrink.
+- C allocates space on the heap with functions like `malloc` and `free`.
+
+## Additional Notes
+- If there are more than four params, MIPS convention is to place the extra params onto the stack just above the freame pointer.
+- Frame pointer is convenient because all references to variables within a procedure use the same offset.
+
+# 2.9 - Communicating with People
 
 # 2.10 (p111 - 113)

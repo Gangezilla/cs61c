@@ -58,16 +58,48 @@ return fib;
  addiu $t2, $0, 1 # put 1 into $t2 for comparison
  beq $s0, $t2, Ret1 # if n == 1, go to Ret1
  addiu $s0, $s0, -2 # n -= 2;
-Loop: # FILL
+Loop: beq $s0, $0, RetF # if n == 0, exit function
   addu $s1, $t0, $t1 # fib = i + j
   addiu $t0, $t1, 0 # i = j
   addiu $t1, $s1, 0 # j = fib;
   addiu $s0, $s0, -1 # n--;
-  # FILL bne
+  j Loop
 Ret0: addiu $v0, $0, 0 # put 0 in return value exit
   j Done
-Ret1: addiu $v0, $0, 1
+Ret1: addiu $v0, $0, 1 # if n == 1, return 1
   j Done
-RetF: addu $v0, $0, $s1
+RetF: addu $v0, $0, $s1 # if n == 0, return fib
 Done: ...
+```
+
+```c
+// Collatz conjecture
+// $s0 -> n
+unsigned n;
+L1: if (n % 2) goto L2;
+goto L3;
+L2: if (n == 1) goto L4;
+n = 3 * n + 1;
+goto L1;
+L3: n = n >> 1;
+goto L1;
+L4: return n;
+```
+
+```asm
+# $s0 -> n
+L1: addiu $t0, $0, 2 # add 2 to temp value
+ div $s0, $t0 # puts (n%2) in $hi (high register)
+ mfhi $t0 # sets $t0 = (n%2) mfhi is move from hi
+ bne $t0, $0, L2 # go to L2 if (n % 2)
+ j L3 # else jump to L3
+L2: addiu $t0, $0, 1 # add 1 to temp register
+ beq $s0, $t0, L4 # if n == 1, go to L4
+ addiu $t0, $0, 3 # add 3 to temp register (which we know is 1)
+ mul $s0, $s0, $t0 # multiply n by temp register
+ addiu $s0, $s0, 1 # add 1 to n
+ j L1 # go to L1
+L3: srl $s0, $s0, 1 # shift right logical by 1
+ j L1 # go to L1
+L4: ...
 ```

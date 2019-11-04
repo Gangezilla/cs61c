@@ -1,5 +1,7 @@
 # Introduction to Synchronous Digital Systems
 
+<http://inst.eecs.berkeley.edu/~cs61c/resources/sds.pdf>
+
 ## Instruction Set Architecture
 
 - One of the big ideas from this semester was that high level languages (C, C++) are converted to a list of assembly language instructions, which get converted to a set of machine instructions.

@@ -47,3 +47,19 @@ a1a0 b1b0 c2c1c0
 - The primitive functions of Boolean algebra are AND, OR, and NOT. They're powerful because we can represent a Boolean equation with AND, OR and NOT gates.
 - The majority function is `y = a.b + a.c + a.c` (where . is AND and + is OR). You can then use this to sketch up a diagram of what this component should look like and then implement it.
 - A bar over a variable indicates the variable is inverted and becomes a NOT.
+- The value of Boolean algebra for circuit design comes from the fact that Boolean expressions can be manipulated mathematically. For instance, an expression can be simplified, which leads directly to a circuit simplification.
+
+y = ab + a + c equation derived from original circuit
+↓
+ab + a + c algebraic simplification
+= a(b + 1) + c
+= a(1) + c
+= a + c
+
+### Laws of Boolean Algebra
+
+- There's a number of laws that apply to Boolean expressions.
+
+## Summary
+
+- There's three representations of a component: truth table, boolean expression, gate diagram.

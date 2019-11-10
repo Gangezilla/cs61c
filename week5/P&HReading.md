@@ -30,3 +30,22 @@
 - So, any logic function can be implemented with only AND, OR, and NOT functions. Any logic function can be written in a canonical form as an equation. It's usually structured in what's called a _sum of products_ form.
 - We can use the relationship between a truth table and a two level representation to generate a gate-level implementation of any set of logic functions.
 - The sum of products representation corresponds to a common structured logic implementation called a _programmable logic array (PLA)_. A PLA has a set of inputs and input complements, and two stages of logic. The first stage is an array of AND gates that form _product terms_, where each product term can consist of any of the inputs or their complements. The second stage is an array of OR gates, each of which forms a logical sum of any number of the product terms.
+
+## ROMs
+
+- Another form of structured logic that can be used to implement a set of logic functions is a _read-only memory (ROM)_. A ROM is called memory because it has a set of locations that can be read, and these are fixed at the time of manufacture.
+- There's also _programmable ROMs (PROMs)_, which can be programmed electronically.
+- A rom has a set of input address lines and outputs, the number of addressable entries in ROM determines the number of address lines.
+- A ROM can encode a collection of logic functions direct from the truth table.
+
+## Don't Cares
+
+- Sometimes when implementing combinational logic, we don't care what the output is, because some other output is true or a subset of input determines the value of output. These situations are called _don't cares_
+- There's two types of don't cares, output and input don't cares. On a truth table, a don't care is represented as an X.
+- This is useful cos it allows us to do logic minimization, which is critical to efficient implementation.
+
+## Arrays of Logic Elements
+
+- Many of the combinational operations to be performed on data have to be done to an entire word (32 bits) of data. Thus we often want to build an array of logic elements which is represented by showing that a given operation will happen to an entire collection of inputs. Inside a machine, much of the time we want to select between a pair of _buses_.
+- A _bus_ is a collection of data lines that are treated as a single logical signal.
+- For example in MIPS, the result of an instruction thats written into a register can come from one of two sources. A multiplexor is used to choose which of the two buses will be written into the result register
